@@ -3,8 +3,10 @@ import functions as f
 from settings import Settings
 from ship import Ship
 from pygame.sprite import Group
-from alien import Alien
 
+pygame.init()
+# Font settings
+# font = pygame.font.SysFont("monospace", 40)
 settings = Settings()
 
 screen = pygame.display.set_mode(
@@ -35,9 +37,9 @@ while not f.check_lose(settings, aliens):
     f.update_bullets(bullets, alien_bullets)
     f.update_fleet(settings, screen, aliens)
     f.check_collisions(bullets, aliens, ship, alien_bullets)
-    f.update_screen(settings, screen, ship, bullets, alien_bullets, aliens)
     clock.tick(60)
-    f.check_win(settings, screen, aliens, clock)
+    f.check_win(settings, screen, aliens, bullets, alien_bullets, ship)
+    f.update_screen(settings, screen, ship, bullets, alien_bullets, aliens)
 
     i -= 1
     if i < 0:

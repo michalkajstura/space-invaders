@@ -2,6 +2,7 @@ import pygame, sys
 from bullet import Bullet, AlienBullet
 from alien import Alien
 from random import sample, random
+from pygame.time import wait
 
 def fire_bullet(settings, screen, ship, bullets):
     """Fire bullet if limit is not reached yet"""
@@ -104,24 +105,6 @@ def move_aliens_down(settings, screen, aliens):
     for alien in aliens:
         alien.rect.y += settings.alien_size + settings.spacing_y * settings.alien_size
 
-def check_lose(settings, aliens):
-    for alien in aliens:
-        if alien.rect.bottom > settings.screen_height:
-            return True
-    return False
-
-def check_win(settings, screen, aliens, clock):
-    if len(aliens) == 0:
-        # If player won, increse difficulity (faster aliens, less time between shots)
-        clock.tick(60*2)
-        settings.alien_velocity = abs(settings.alien_velocity)
-        settings.alien_velocity += 0.7
-
-        settings.shooting_time *= 0.8
-        settings.max_bullets += 1
-        spawn_new_wave(settings, screen, aliens)
-        settings.background = make_random_background(settings)
-
 def spawn_new_wave(settings, screen, aliens):
     """Increse alien's velocity and spawn new wave"""
     for row in range(settings.number_of_rows):
@@ -137,6 +120,7 @@ def shoot(settings, screen, aliens, alien_bullets):
         alien_bullets.add(bullet)
 
 def make_random_background(settings):
+    """Randomly generates stars positions"""
     stars = []
     for col in range(settings.screen_width):
         for row in range(settings.screen_height):
@@ -144,11 +128,58 @@ def make_random_background(settings):
                 stars.append([col, row])
     return stars
 
-
 def draw_random_background(settings, screen, stars):
+    """Draws circles on positions delivered in list stars"""
     screen.fill(settings.black)
     for star in stars:
         pygame.draw.circle(screen, settings.white, (star[0], star[1]), 2)
+
+def display_round(settings, screen, text):
+    """Display current round's number after player killed all the aliens"""
+    font = pygame.font.SysFont('monospace', 100)
+    text_surface = font.render(text, True, (0, 0, 255))
+    text_rect = text_surface.get_rect()
+    text_rect.center = (settings.screen_width/2, settings.screen_height/2)
+    print(text_rect.width, text_rect.center)
+    screen.blit(text_surface, text_rect)
+    pygame.display.flip()
+    wait(1000*2)
+
+def check_lose(settings, aliens):
+    for alien in aliens:
+        if alien.rect.bottom > settings.screen_height:
+            return True
+    return False
+
+def check_win(settings, screen, aliens, bullets, alien_bullets, ship):
+    if len(aliens) == 0:
+        # If player won, increse difficulity (faster aliens, less time between shots)
+        settings.alien_velocity = abs(settings.alien_velocity)
+        settings.alien_velocity += 0.7
+
+        settings.shooting_time *= 0.8
+        settings.max_bullets += 1
+
+        spawn_new_wave(settings, screen, aliens)
+        settings.background = make_random_background(settings)
+
+        clear_screen(settings, bullets, alien_bullets, ship)
+        display_round(settings, screen, "Round {}".format(settings.round))
+        settings.round += 1
+
+def clear_screen(settings, bullets, alien_bullets, ship):
+    """Delete all object after the player won a round"""
+    for bullet in bullets.copy():
+        bullets.remove(bullet)
+
+    for bullet in alien_bullets:
+       alien_bullets.remove(bullet)
+
+    ship.center = settings.screen_width / 2
+    ship.update()
+
+
+
 
 
 

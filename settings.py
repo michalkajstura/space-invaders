@@ -41,5 +41,7 @@ class Settings():
         # how many seconds betweed shots
         self.shooting_time = 3
 
+        self.round = 1
+
 
 
